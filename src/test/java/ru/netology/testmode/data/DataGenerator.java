@@ -32,12 +32,14 @@ public class DataGenerator {
     }
 
     public static String getRandomLogin() {
+        String login = faker.gameOfThrones().dragon();
         // TODO: добавить логику для объявления переменной login и задания её значения, для генерации
         //  случайного логина используйте faker
         return login;
     }
 
     public static String getRandomPassword() {
+        String password = faker.bothify("##??#?#??#");
         // TODO: добавить логику для объявления переменной password и задания её значения, для генерации
         //  случайного пароля используйте faker
         return password;
