@@ -1,16 +1,16 @@
 package ru.netology.testmode.test;
 
+import com.codeborne.selenide.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.requestSpecification;
+import static ru.netology.testmode.data.DataGenerator.*;
 import static ru.netology.testmode.data.DataGenerator.Registration.getRegisteredUser;
 import static ru.netology.testmode.data.DataGenerator.Registration.getUser;
-import static ru.netology.testmode.data.DataGenerator.getRandomLogin;
-import static ru.netology.testmode.data.DataGenerator.getRandomPassword;
 
 class AuthTest {
 
@@ -23,65 +23,52 @@ class AuthTest {
     @DisplayName("Should successfully login with active registered user")
     void shouldSuccessfulLoginIfRegisteredActiveUser() {
         var registeredUser = getRegisteredUser("active");
-        given()
-                .spec(requestSpecification)
-                .when()
-                .param(String.valueOf(registeredUser))
-                .post("/api/system/users")
-                .then();
+        $("[name=login]").setValue(registeredUser.getLogin());
+        $("[name=password]").setValue(registeredUser.getPassword());
+        $(".button__text").click();
+        $x("//*[contains(text(), 'Личный кабинет')]").shouldBe(Condition.visible);
 
-        // TODO: добавить логику теста, в рамках которого будет выполнена попытка входа в личный кабинет с учётными
-        //  данными зарегистрированного активного пользователя, для заполнения полей формы используйте
-        //  пользователя registeredUser
     }
 
     @Test
     @DisplayName("Should get error message if login with not registered user")
     void shouldGetErrorIfNotRegisteredUser() {
-        var notRegisteredUser = getUser("active");
-        given()
-                .spec(requestSpecification)
-                .when()
-                .param(String.valueOf(notRegisteredUser))
-                .post("/api/system/users")
-                .then()
-                .statusCode(400);
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет
-        //  незарегистрированного пользователя, для заполнения полей формы используйте пользователя notRegisteredUser
+        $("[name=login]").setValue("123456");
+        $("[name=password]").setValue("Ekaterina");
+        $(".button__text").click();
+        $(".notification__title").shouldBe(Condition.visible);
     }
 
     @Test
     @DisplayName("Should get error message if login with blocked registered user")
     void shouldGetErrorIfBlockedUser() {
         var blockedUser = getRegisteredUser("blocked");
-        given()
-                .spec(requestSpecification)
-                .when()
-                .param(String.valueOf(blockedUser))
-                .post("/api/system/users")
-                .then()
-                .statusCode(400);
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет,
-        //  заблокированного пользователя, для заполнения полей формы используйте пользователя blockedUser
+        $("[name=login]").setValue(blockedUser.getLogin());
+        $("[name=password]").setValue(blockedUser.getPassword());
+        $(".button__text").click();
+        $(".notification__title").shouldBe(Condition.visible);
     }
 
     @Test
     @DisplayName("Should get error message if login with wrong login")
     void shouldGetErrorIfWrongLogin() {
         var registeredUser = getRegisteredUser("active");
-        var wrongLogin = getRandomLogin();
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет с неверным
-        //  логином, для заполнения поля формы "Логин" используйте переменную wrongLogin,
-        //  "Пароль" - пользователя registeredUser
+        var wrongLogin = getInvalidLogin();
+        $("[name=login]").setValue(wrongLogin);
+        $("[name=password]").setValue(registeredUser.getPassword());
+        $(".button__text").click();
+        $(".notification__title").shouldBe(Condition.visible);
+
     }
 
     @Test
     @DisplayName("Should get error message if login with wrong password")
     void shouldGetErrorIfWrongPassword() {
         var registeredUser = getRegisteredUser("active");
-        var wrongPassword = getRandomPassword();
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет с неверным
-        //  паролем, для заполнения поля формы "Логин" используйте пользователя registeredUser,
-        //  "Пароль" - переменную wrongPassword
+        var wrongPassword = getRandomInvalidPassword();
+        $("[name=login]").setValue(registeredUser.getLogin());
+        $("[name=password]").setValue(wrongPassword);
+        $(".button__text").click();
+        $(".notification__title").shouldBe(Condition.visible);
     }
 }

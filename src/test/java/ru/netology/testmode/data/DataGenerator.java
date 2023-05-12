@@ -40,6 +40,11 @@ public class DataGenerator {
         String login = faker.gameOfThrones().dragon();
         return login;
     }
+    public static String getInvalidLogin() {
+        String login = faker.bothify("#&#");
+        return login;
+    }
+
 
     public static String getRandomPassword() {
         String password = faker.bothify("##??#?#??#");
