@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Selenide.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.requestSpecification;
@@ -33,10 +35,12 @@ class AuthTest {
     @Test
     @DisplayName("Should get error message if login with not registered user")
     void shouldGetErrorIfNotRegisteredUser() {
-        $("[name=login]").setValue("123456");
-        $("[name=password]").setValue("Ekaterina");
+        var notRegisteredUser = getUser("active");
+
+        $("[name=login]").setValue(notRegisteredUser.getLogin());
+        $("[name=password]").setValue(notRegisteredUser.getPassword());
         $(".button__text").click();
-        $(".notification__title").shouldBe(Condition.visible);
+        $(".notification__content").shouldBe(Condition.visible).shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
     }
 
     @Test
@@ -46,7 +50,7 @@ class AuthTest {
         $("[name=login]").setValue(blockedUser.getLogin());
         $("[name=password]").setValue(blockedUser.getPassword());
         $(".button__text").click();
-        $(".notification__title").shouldBe(Condition.visible);
+        $(".notification__content").shouldBe(Condition.visible).shouldHave(Condition.text("Ошибка! Пользователь заблокирован"));
     }
 
     @Test
@@ -57,8 +61,7 @@ class AuthTest {
         $("[name=login]").setValue(wrongLogin);
         $("[name=password]").setValue(registeredUser.getPassword());
         $(".button__text").click();
-        $(".notification__title").shouldBe(Condition.visible);
-
+        $(".notification__content").shouldBe(Condition.visible).shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
     }
 
     @Test
@@ -69,6 +72,6 @@ class AuthTest {
         $("[name=login]").setValue(registeredUser.getLogin());
         $("[name=password]").setValue(wrongPassword);
         $(".button__text").click();
-        $(".notification__title").shouldBe(Condition.visible);
+        $(".notification__content").shouldBe(Condition.visible).shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
     }
 }
